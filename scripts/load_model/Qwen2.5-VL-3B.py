@@ -13,7 +13,7 @@ def get_absolute_path():
     """
     自动获取模型快照的绝对路径，避免手动输入长字符串文件夹名
     """
-    base_dir = r"./VLM/model_weights/Qwen2.5-VL-3B/models--Qwen--Qwen2.5-VL-3B-Instruct/snapshots"
+    base_dir = r"model_weights/Qwen2.5-VL-3B/models--Qwen--Qwen2.5-VL-3B-Instruct/snapshots"
     if not os.path.exists(base_dir):
         print(f"错误：找不到基础路径 {base_dir}")
         return None
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         for num in range(0, 1):
             print("-" * 30)
             print(f"第 {num} 次测试")
-            img_rel_path = f"VLM/images/test/{num}.png"
+            img_rel_path = f"dataset/images/test/{num}.png"
             
             if not os.path.exists(img_rel_path):
                 print(f"跳过：找不到图片 {img_rel_path}")

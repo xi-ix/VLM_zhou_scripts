@@ -8,17 +8,68 @@
 ### count_images.py
 递归统计指定目录下的图片文件数量。支持 JPG/JPEG/PNG/GIF/BMP/WEBP/SVG/TIFF 等常见图片格式。
 
-### detect_violation.py
-调用 Qwen3-VL-4B 模型，读取文件夹中的图片，识别交通违章行为（闯红灯、违停、逆行、压实线变道、占用应急车道等），将检测到违章的图片复制到输出文件夹，并记录日志。
+### count_classes.py
+统计 YOLO 格式 txt 标签中的类别分布。默认读取 `/data3/VLA/set`，每行标签的第一个数字作为类别 ID，输出标签文件数量、目标框总数、类别数量以及每个类别的目标框数量。
 
-### Qwen3-VL-4B.py
-调用 Qwen3-VL-4B 模型，对视频抽帧后的图片进行交通拥堵识别。分析每帧中车辆数量、汽车占道路比例，判断是否拥堵，将拥堵帧的文件名写入日志。
+用法示例：
+
+```bash
+python3 /home/wangzhe/VLM/scripts/count_classes.py /data3/VLA/set
+```
+
+### draw_yolo_boxes.py
+读取图片及其同名 YOLO txt 标签，将归一化的 `[class_id, x_center, y_center, width, height]` 框转换为像素坐标并绘制到图片上。默认输入 `/home/wangzhe/VLM/dataset/class_samples`，输出到 `/home/wangzhe/VLM/dataset/class_samples_vis`，保留原目录结构且不覆盖原图。
+
+用法示例：
+
+```bash
+python3 /home/wangzhe/VLM/scripts/draw_yolo_boxes.py \
+  --input /home/wangzhe/VLM/dataset/class_samples \
+  --output /home/wangzhe/VLM/dataset/class_samples_vis
+```
+
+### find_duplicate_images.py
+按图片文件内容计算 SHA256，用于查找完全重复的图片。默认只生成报告，不改动源数据；报告包括重复组 JSON、重复图片配对 CSV，以及重复图片标签差异统计。支持将重复图片及同名标签移动到暂存目录，也支持在没有源目录删除权限时复制重复项和生成去重后的数据副本。
+
+常用用法：
+
+```bash
+# 只生成重复报告，不修改源目录
+python3 /home/wangzhe/VLM/scripts/find_duplicate_images.py \
+  --source /data3/VLA/set \
+  --report-dir /home/wangzhe/VLM/dataset/duplicate_report
+
+# 复制重复项到暂存目录，并生成去重后的数据副本，不修改源目录
+python3 /home/wangzhe/VLM/scripts/find_duplicate_images.py \
+  --source /data3/VLA/set \
+  --report-dir /home/wangzhe/VLM/dataset/duplicate_report \
+  --copy-duplicates \
+  --trash-dir /home/wangzhe/VLM/dataset/duplicate_removed \
+  --dedup-output /home/wangzhe/VLM/dataset/set_dedup
+
+# 在源目录有写权限时，将重复项移动到暂存目录
+python3 /home/wangzhe/VLM/scripts/find_duplicate_images.py \
+  --source /data3/VLA/set \
+  --report-dir /home/wangzhe/VLM/dataset/duplicate_report \
+  --move-duplicates \
+  --trash-dir /home/wangzhe/VLM/dataset/duplicate_removed
+```
 
 ### rename_images.py
 将指定目录下的图片文件按序号批量重命名（如 img_001.jpg, img_002.jpg），支持自定义前缀，自动计算序号位数，防止文件名冲突和覆盖。
 
-### spider.py
-从 Bing 和百度搜索引擎批量爬取图片。内置关键词矩阵（电动车违章、行人闯红灯等交通场景），支持中英文关键词，按关键词分目录保存。
+### sample_class_images.py
+从 YOLO 数据集中按类别抽样图片。默认读取 `/data3/VLA/set`，每个类别随机抽取 10 张包含该类别的图片，并将图片和同名 txt 标签复制到 `/home/wangzhe/VLM/dataset/class_samples/class_类别ID`。支持通过随机种子复现抽样结果。
+
+用法示例：
+
+```bash
+python3 /home/wangzhe/VLM/scripts/sample_class_images.py \
+  --source /data3/VLA/set \
+  --output /home/wangzhe/VLM/dataset/class_samples \
+  --num 10 \
+  --seed 42
+```
 
 ### stat_video_duration.py
 统计指定路径下所有视频文件的时长。通过 ffprobe 获取视频时长，支持从配置文件读取多个目标路径，结果输出为 CSV 汇总表（含视频数量、总时长、失败文件等）。
