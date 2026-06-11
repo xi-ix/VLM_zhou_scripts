@@ -17,6 +17,36 @@
 python3 /home/wangzhe/VLM/scripts/count_classes.py /data3/VLA/set
 ```
 
+### check_class4_with_qwen_vl.py
+调用本地 Qwen 视觉模型检查 YOLO 标签中类别 4 的目标，用于将“电动车不在规定车道行驶”细分为：
+
+- `4`：电动车在机动车道行驶
+- `5`：电动车在斑马线上行驶
+
+脚本会逐个读取 class 4 目标，在图片上临时画红框后交给模型判断，并输出预测 CSV。默认不修改标签；加 `--apply` 后会将预测为 `5` 的目标对应 txt 行首从 `4` 改为 `5`，并自动备份原始 txt。加 `--no-visualization` 后不保留可视化图片，只保留 CSV 和标签备份。
+
+测试用法：
+
+```bash
+conda run -n qwenVL python /home/wangzhe/VLM/scripts/check_class4_with_qwen_vl.py \
+  --input /home/wangzhe/VLM/dataset/class_samples \
+  --output /home/wangzhe/VLM/dataset/class4_qwen_check \
+  --model-family qwen3-4b \
+  --model-dir /home/wangzhe/VLM/model_weights/Qwen3-VL-4B-Instruct
+```
+
+正式修改标签：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 conda run -n qwenVL python /home/wangzhe/VLM/scripts/check_class4_with_qwen_vl.py \
+  --input /home/wangzhe/VLM/dataset/set_dedup \
+  --output /home/wangzhe/VLM/dataset/class4_qwen_check_set_dedup \
+  --model-family qwen3-4b \
+  --model-dir /home/wangzhe/VLM/model_weights/Qwen3-VL-4B-Instruct \
+  --apply \
+  --no-visualization
+```
+
 ### draw_yolo_boxes.py
 读取图片及其同名 YOLO txt 标签，将归一化的 `[class_id, x_center, y_center, width, height]` 框转换为像素坐标并绘制到图片上。默认输入 `/home/wangzhe/VLM/dataset/class_samples`，输出到 `/home/wangzhe/VLM/dataset/class_samples_vis`，保留原目录结构且不覆盖原图。
 
